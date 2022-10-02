@@ -1,0 +1,77 @@
+
+
+import IPython as IP
+IP.get_ipython().magic('reset -sf')
+
+import numpy as np
+import scipy as sp
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import sklearn as sk
+from sklearn import linear_model
+from sklearn import pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn import linear_model
+from sklearn.linear_model import LinearRegression
+
+plt.close('all')
+
+#%% Import Data
+
+#X = np.loadtxt('X.txt')
+#Y = np.loadtxt('Y.txt')
+X_train = np.loadtxt('X_train.txt')
+X_val = np.loadtxt('X_validation.txt')
+Y_train = np.loadtxt('y_train.txt')
+Y_val = np.loadtxt('y_validation.txt')
+
+X_train = np.expand_dims(X_train, axis=1)
+X_val = np.expand_dims(X_val, axis=1)
+Y_train = np.expand_dims(Y_train, axis=1)
+Y_val = np.expand_dims(Y_val, axis=1)
+
+# plt.scatter(X,Y)
+
+#%% Build Model
+
+train_poly_errors, val_poly_errors = [], []
+
+poly_reg = PolynomialFeatures(degree=20)
+X_poly = poly_reg.fit_transform(X_train, X_val)
+lin_reg2 = LinearRegression()
+lin_reg2.fit(X_poly, Y_train)
+
+X_grid = np.arange(min(X_train),max(X_train),0.1)
+X_grid = X_grid.reshape(len(X_grid),1)
+
+plt.figure()
+plt.scatter(X_train, Y_train)
+plt.scatter(X_val,Y_val)
+plt.plot(X_grid, lin_reg2.predict(poly_reg.fit_transform(X_grid)))
+plt.xlabel('X')
+plt.ylabel('Y')
+#%%RIDGE
+
+X_model = np.linspace(-3,3,num=1000)
+X_model = np.expand_dims(X_model,axis=1)
+
+plt.figure(figsize=(6.5,3))
+plt.grid(True)
+plt.scatter(X_train,Y_train,label='Training Data')
+plt.scatter(X_val, Y_val, label='Validation Data')
+plt.plot(X_grid, lin_reg2.predict(poly_reg.fit_transform(X_grid)), 'g--', label='Polynomial Model')
+line_style=['-','--',':']
+n=0
+for i in[10]: #Set Alpha Parameter
+    model = sk.pipeline.make_pipeline(sk.preprocessing.PolynomialFeatures(20),
+            sk.linear_model.Ridge(alpha=i))
+    model.fit(X_train,Y_train)
+    Y_model = model.predict(X_model)
+    plt.plot(X_model,Y_model,':',color='red', label='Ridge Model')
+    n=n+1
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.ylim([-1,11])
+plt.legend(framealpha=1)
+plt.title('Polynomial Ridge Regression')
+
